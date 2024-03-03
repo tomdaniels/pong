@@ -43,15 +43,11 @@ fn main() {
         let dt = rl.get_frame_time();
         rl.clear_background(Color::BLACK);
 
-        let main_title = Title::new("Press [Enter] or [Space] to serve", FONT_SIZE);
-        let mut serve_title = Title::new("Player 1 scored", FONT_SIZE * 2);
-        let mut serve_subtitle = Title::new("Player 2: Press [Enter] to serve", FONT_SIZE);
-        let mut winner_title = Title::new("Player 1 wins", FONT_SIZE * 2);
-        let restart_title  = Title::new("Press [Enter] or [Space] to start again", FONT_SIZE);
-
         match game_state {
             GameState::IDLE => {
+                let main_title = Title::new("Press [Enter] or [Space] to serve", FONT_SIZE);
                 rl.draw_text(&main_title.content, main_title.x, main_title.y, FONT_SIZE, Color::WHITE);
+
                 if rl.is_key_down(KeyboardKey::KEY_ENTER) || rl.is_key_down(KeyboardKey::KEY_SPACE) {
                     play_sound(&sink, "serve");
                     game_state = GameState::PLAY; 
@@ -117,6 +113,8 @@ fn main() {
             GameState::SERVE => {
                 draw_scores(&mut rl, &p1.score, &p2.score);
 
+                let mut serve_title = Title::new("Player 1 scored", FONT_SIZE * 2);
+                let mut serve_subtitle = Title::new("Player 2: Press [Enter] to serve", FONT_SIZE);
                 if p1.serves {
                     serve_title.set_content("player 2 scored");
                     serve_subtitle.set_content("player 1: press [Space] to serve");
@@ -155,10 +153,13 @@ fn main() {
                 draw_scores(&mut rl, &p1.score, &p2.score);
                 ball.reset(None);
 
+                let mut winner_title = Title::new("Player 1 wins", FONT_SIZE * 2);
                 if p2.score == SCORE_TARGET {
                     winner_title.set_content("Player 2 wins");
                 }
                 rl.draw_text(&winner_title.content, winner_title.x, winner_title.y, winner_title.font_size, Color::GREEN);
+
+                let restart_title  = Title::new("Press [Enter] or [Space] to start again", FONT_SIZE);
                 rl.draw_text(
                     &restart_title.content,
                     restart_title.x,
