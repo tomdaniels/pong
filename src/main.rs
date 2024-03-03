@@ -12,16 +12,14 @@ use raylib::{color::Color, prelude::*};
 
 enum GameState { IDLE, PLAY, SERVE, DONE }
 
-fn draw_scores(rl: &mut RaylibDrawHandle<'_>, score1: &i32, score2: &i32) {
-    rl.draw_text(&score1.to_string(), WINDOW_WIDTH as i32 / 8, 125, FONT_SIZE * 3, Color::WHITE);
-    rl.draw_text(&score2.to_string(), WINDOW_WIDTH as i32 - WINDOW_WIDTH as i32 / 8, 125, FONT_SIZE * 3, Color::WHITE);
-}
-
 fn main() {
     let mut game_state = GameState::IDLE;
 
-    let mut p1   = Paddle::new(3.0, 3.0);
-    let mut p2   = Paddle::new(WINDOW_WIDTH - p1.width - 3.0, WINDOW_HEIGHT - p1.height - 3.0);
+    let mut p1 = Paddle::new(3.0, 3.0);
+    let mut p2 = Paddle::new(
+        WINDOW_WIDTH - p1.width - 3.0,
+        WINDOW_HEIGHT - p1.height - 3.0
+    );
     let mut ball = Ball::new(WINDOW_WIDTH_HALF, WINDOW_HEIGHT_HALF);
 
     // raylib engine thread
@@ -139,17 +137,16 @@ fn main() {
                     }
                 }
 
-                let vertical_offset = 125;
                 rl.draw_text(
                     &serve_title.content, 
                     serve_title.x, 
-                    vertical_offset + serve_title.y,
+                    VERTICAL_TEXT_OFFSET + serve_title.y,
                     serve_title.font_size,
                     Color::WHITE
                 );
                 rl.draw_text(&serve_subtitle.content,
                     serve_subtitle.x,
-                    vertical_offset + (serve_subtitle.y * 2) + serve_title.font_size,
+                    VERTICAL_TEXT_OFFSET + (serve_subtitle.y * 2) + serve_title.font_size,
                     serve_subtitle.font_size, Color::WHITE
                 );
             }
@@ -183,3 +180,21 @@ fn main() {
         p2  .render(&mut rl);
     }
 }
+
+
+fn draw_scores(rl: &mut RaylibDrawHandle<'_>, score1: &i32, score2: &i32) {
+    rl.draw_text(
+        &score1.to_string(),
+        WINDOW_WIDTH as i32 / 8,
+        VERTICAL_TEXT_OFFSET,
+        FONT_SIZE * 3,
+        Color::WHITE
+    );
+    rl.draw_text(&score2.to_string(),
+        WINDOW_WIDTH as i32 - WINDOW_WIDTH as i32 / 8,
+        VERTICAL_TEXT_OFFSET,
+        FONT_SIZE * 3,
+        Color::WHITE
+    );
+}
+
