@@ -90,7 +90,7 @@ fn main() {
                 let player2_scored = ball.x < 0.0;
                 if player1_scored || player2_scored {
                     play_sound(&audio, "point_scored");
-                    ball.dx = -ball.dx;
+                    ball.reset(Some(-ball.dx));
 
                     if player1_scored {
                         p1.scored();
