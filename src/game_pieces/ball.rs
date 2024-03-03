@@ -1,6 +1,5 @@
 use crate::constants::*;
 use crate::game_pieces::paddle::Paddle;
-use crate::sound_manager::*;
 
 use rand::Rng;
 use raylib::{color::Color, drawing::RaylibDrawHandle, prelude::*};
@@ -11,6 +10,7 @@ pub struct Ball {
     pub dx:     f32,
     pub dy:     f32,
     pub radius: f32,
+    pub speed:  f32,
     pub color:  Color,
 }
 
@@ -19,12 +19,12 @@ impl Ball {
         let mut rng = rand::thread_rng();
 
         // delta x/y to track and initialise ball velocity
-        let mut dx = 325.0;
+        let mut dx = 425.0;
         let dy = rng.gen_range::<f32, _>(-250.0..250.0);
 
         // 50/50 chance of serving left/right
         let exponent = rng.gen_range(0.0..1.0);
-        if exponent >= 0.5 { dx = -325.0; }
+        if exponent >= 0.5 { dx = -425.0; }
 
         Ball {
             x,
@@ -32,6 +32,7 @@ impl Ball {
             dx,
             dy,
             radius: 7.0,
+            speed:  425.0,
             color:  Color::WHITE
         }
     }
@@ -45,23 +46,28 @@ impl Ball {
         );
     }
 
-    pub fn tick(&mut self, dt: f32, sm: &SoundManager) {
+    pub fn tick(&mut self, dt: f32) {
         self.x += self.dx * dt;
         self.y += self.dy * dt;
 
+    }
+
+    pub fn wall_hit(&mut self) -> bool {
         // upper boundary detection
         if self.y <= 0.0 {
-            // sm.play_sound("wall_hit");
             self.y = 0.0 + self.radius;
             self.dy = -self.dy;
+            return true;
         }
 
         // lower boundary detection
         if self.y >= WINDOW_HEIGHT - self.radius {
-            // sm.play_sound("wall_hit");
             self.y = WINDOW_HEIGHT - self.radius;
             self.dy = -self.dy;
+            return true;
         }
+
+        return false;
     }
 
     // Axis-Aligned Bounding Box (AABB) collision detection
@@ -88,8 +94,9 @@ impl Ball {
         }
     }
 
-    pub fn reset(&mut self) {
+    pub fn reset(&mut self, dx: Option<f32>) {
         self.x = WINDOW_WIDTH_HALF;
         self.y = WINDOW_HEIGHT_HALF;
+        self.dx = dx.unwrap_or(self.speed);
     }
 }

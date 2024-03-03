@@ -1,10 +1,12 @@
 mod constants;
 mod game_pieces;
-mod sound_manager;
 
 use constants::*;
 use game_pieces::{Paddle, Direction, Ball, Title};
-use sound_manager::SoundManager;
+
+use std::fs::File;
+use std::io::BufReader;
+use rodio::{OutputStream, Sink};
 
 use raylib::{color::Color, prelude::*};
 
@@ -16,18 +18,27 @@ fn draw_scores(rl: &mut RaylibDrawHandle<'_>, score1: &i32, score2: &i32) {
 }
 
 fn main() {
-    let sm = SoundManager::new();
-
-    let mut ball = Ball::new(WINDOW_WIDTH_HALF, WINDOW_HEIGHT_HALF);
-    let mut p1 = Paddle::new(3.0, 3.0);
-    let mut p2 = Paddle::new(WINDOW_WIDTH - p1.width - 3.0, WINDOW_HEIGHT - p1.height - 3.0);
-
     let mut game_state = GameState::IDLE;
 
+    let mut p1   = Paddle::new(3.0, 3.0);
+    let mut p2   = Paddle::new(WINDOW_WIDTH - p1.width - 3.0, WINDOW_HEIGHT - p1.height - 3.0);
+    let mut ball = Ball::new(WINDOW_WIDTH_HALF, WINDOW_HEIGHT_HALF);
+
+    // raylib engine thread
     let (mut rayl, thread) = raylib::init()
         .size(WINDOW_WIDTH as i32, WINDOW_HEIGHT as i32)
         .title("Pong")
         .build();
+
+    // audio stream thread
+    // TODO: replace inlining the audio set up and defer to sound_manager module
+    // let sm = SoundManager::new();
+    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+    let sink = Sink::try_new(&stream_handle).unwrap();
+    fn play_sound(sink: &Sink, filename: &str) {
+        let sound = BufReader::new(File::open(format!("src/assets/{}.wav", filename)).unwrap());
+        sink.append(rodio::Decoder::new(BufReader::new(sound)).unwrap());
+    }
 
     while !rayl.window_should_close() {
         let mut rl = rayl.begin_drawing(&thread);
@@ -44,13 +55,14 @@ fn main() {
             GameState::IDLE => {
                 rl.draw_text(&main_title.content, main_title.x, main_title.y, FONT_SIZE, Color::WHITE);
                 if rl.is_key_down(KeyboardKey::KEY_ENTER) || rl.is_key_down(KeyboardKey::KEY_SPACE) {
+                    play_sound(&sink, "serve");
                     game_state = GameState::PLAY; 
                 }
             },
 
             GameState::PLAY => {
                 draw_scores(&mut rl, &p1.score, &p2.score);
-                ball.tick(dt, &sm);
+                ball.tick(dt);
 
                 if rl.is_key_down(KeyboardKey::KEY_W) {
                     p1.move_paddle(Direction::UP);
@@ -66,13 +78,17 @@ fn main() {
                     p2.move_paddle(Direction::DOWN); 
                 }
 
+                if ball.wall_hit() {
+                    play_sound(&sink, "wall_hit");
+                }
+
                 if ball.collides(&p1) {
-                    // sm.play_sound("paddle_hit");
+                    play_sound(&sink, "ping");
                     ball.dx = -ball.dx * 1.03;
                     ball.x = p1.x + p1.width;
                 }
                 if ball.collides(&p2) {
-                    // sm.play_sound("paddle_hit");
+                    play_sound(&sink, "pong");
                     ball.dx = -ball.dx * 1.03;
                     ball.x = p2.x - ball.radius;
                 }
@@ -80,7 +96,9 @@ fn main() {
                 let player1_scored = ball.x > WINDOW_WIDTH;
                 let player2_scored = ball.x < 0.0;
                 if player1_scored || player2_scored {
-                    // sm.play_sound("point_scored");
+                    play_sound(&sink, "point_scored");
+                    ball.dx = -ball.dx;
+
                     if player1_scored {
                         p1.scored();
                         p1.serves = false;
@@ -92,7 +110,6 @@ fn main() {
                         p1.serves = true;
                     }
 
-                    ball.dx = -ball.dx;
                     game_state = GameState::SERVE;
                 }
 
@@ -102,15 +119,15 @@ fn main() {
             },
 
             GameState::SERVE => {
-                // sm.play_sound("wall_hit");
                 draw_scores(&mut rl, &p1.score, &p2.score);
-                ball.reset();
 
                 if p1.serves {
                     serve_title.set_content("player 2 scored");
                     serve_subtitle.set_content("player 1: press [Space] to serve");
 
                     if rl.is_key_down(KeyboardKey::KEY_SPACE) {
+                        play_sound(&sink, "serve");
+                        ball.reset(None);
                         game_state = GameState::PLAY; 
                     }
                 } else if p2.serves {
@@ -118,6 +135,8 @@ fn main() {
                     serve_subtitle.set_content("player 2: press [Enter] to serve");
 
                     if rl.is_key_down(KeyboardKey::KEY_ENTER) {
+                        play_sound(&sink, "serve");
+                        ball.reset(Some(-ball.speed));
                         game_state = GameState::PLAY; 
                     }
                 }
@@ -139,7 +158,7 @@ fn main() {
 
             GameState::DONE => {
                 draw_scores(&mut rl, &p1.score, &p2.score);
-                ball.reset();
+                ball.reset(None);
 
                 if p2.score == SCORE_TARGET {
                     winner_title.set_content("Player 2 wins");
