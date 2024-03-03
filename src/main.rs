@@ -31,11 +31,12 @@ fn main() {
     // TODO: replace inlining the audio set up and defer to sound_manager module
     // let sm = SoundManager::new();
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
-    let sink = Sink::try_new(&stream_handle).unwrap();
-    fn play_sound(sink: &Sink, filename: &str) {
+    let audio = Sink::try_new(&stream_handle).unwrap();
+    fn play_sound(s: &Sink, filename: &str) {
         let file = format!("src/assets/{}.wav", filename);
         let sound = BufReader::new(File::open(file).unwrap());
-        sink.append(Decoder::new(BufReader::new(sound)).unwrap());
+        let source = Decoder::new(BufReader::new(sound)).unwrap();
+        s.append(source);
     }
 
     while !rayl.window_should_close() {
@@ -49,7 +50,7 @@ fn main() {
                 rl.draw_text(&main_title.content, main_title.x, main_title.y, FONT_SIZE, Color::WHITE);
 
                 if rl.is_key_down(KeyboardKey::KEY_ENTER) || rl.is_key_down(KeyboardKey::KEY_SPACE) {
-                    play_sound(&sink, "serve");
+                    play_sound(&audio, "serve");
                     game_state = GameState::PLAY; 
                 }
             },
@@ -73,22 +74,22 @@ fn main() {
                 }
 
                 if ball.wall_hit() {
-                    play_sound(&sink, "wall_hit");
+                    play_sound(&audio, "wall_hit");
                 }
 
                 if ball.collides(&p1) {
-                    play_sound(&sink, "ping");
+                    play_sound(&audio, "ping");
                     ball.bounce(p1.x + p1.width);
                 }
                 if ball.collides(&p2) {
-                    play_sound(&sink, "pong");
+                    play_sound(&audio, "pong");
                     ball.bounce(p2.x - ball.radius);
                 }
 
                 let player1_scored = ball.x > WINDOW_WIDTH;
                 let player2_scored = ball.x < 0.0;
                 if player1_scored || player2_scored {
-                    play_sound(&sink, "point_scored");
+                    play_sound(&audio, "point_scored");
                     ball.dx = -ball.dx;
 
                     if player1_scored {
@@ -120,7 +121,7 @@ fn main() {
                     serve_subtitle.set_content("player 1: press [Space] to serve");
 
                     if rl.is_key_down(KeyboardKey::KEY_SPACE) {
-                        play_sound(&sink, "serve");
+                        play_sound(&audio, "serve");
                         ball.reset(None);
                         game_state = GameState::PLAY; 
                     }
@@ -129,7 +130,7 @@ fn main() {
                     serve_subtitle.set_content("player 2: press [Enter] to serve");
 
                     if rl.is_key_down(KeyboardKey::KEY_ENTER) {
-                        play_sound(&sink, "serve");
+                        play_sound(&audio, "serve");
                         ball.reset(Some(-ball.speed));
                         game_state = GameState::PLAY; 
                     }
