@@ -83,16 +83,17 @@ impl Ball {
         return true;
     }
 
-    pub fn bounce(&mut self) {
-        self.invert_x_trajectory();
-        self.random_y_trajectory();
+    pub fn bounce(&mut self, x_offset: f32) {
+        self.x = x_offset;
+        self.invert_dx_trajectory();
+        self.random_dy_trajectory();
     }
 
-    fn invert_x_trajectory(&mut self) {
+    fn invert_dx_trajectory(&mut self) {
         self.dx = -self.dx * SPEED_INCR_RATE;
     }
 
-    fn random_y_trajectory(&mut self) {
+    fn random_dy_trajectory(&mut self) {
         let mut rng = rand::thread_rng();
 
         if self.dy < 0.0 {
