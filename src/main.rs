@@ -84,13 +84,13 @@ fn main() {
 
                 if ball.collides(&p1) {
                     play_sound(&sink, "ping");
-                    ball.dx = -ball.dx * 1.03;
                     ball.x = p1.x + p1.width;
+                    ball.bounce();
                 }
                 if ball.collides(&p2) {
                     play_sound(&sink, "pong");
-                    ball.dx = -ball.dx * 1.03;
                     ball.x = p2.x - ball.radius;
+                    ball.bounce();
                 }
 
                 let player1_scored = ball.x > WINDOW_WIDTH;

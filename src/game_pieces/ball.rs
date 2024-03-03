@@ -80,11 +80,19 @@ impl Ball {
             return false
         }
 
-        self.continue_trajectory();
         return true;
     }
 
-    fn continue_trajectory(&mut self) {
+    pub fn bounce(&mut self) {
+        self.invert_x_trajectory();
+        self.random_y_trajectory();
+    }
+
+    fn invert_x_trajectory(&mut self) {
+        self.dx = -self.dx * SPEED_INCR_RATE;
+    }
+
+    fn random_y_trajectory(&mut self) {
         let mut rng = rand::thread_rng();
 
         if self.dy < 0.0 {
