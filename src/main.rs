@@ -1,14 +1,13 @@
+use std::fs::File;
+use std::io::BufReader;
+use rodio::{Decoder, OutputStream, Sink};
+use raylib::{color::Color, prelude::*};
+
 mod constants;
 mod game_pieces;
 
 use constants::*;
 use game_pieces::{Paddle, Direction, Ball, Title};
-
-use std::fs::File;
-use std::io::BufReader;
-use rodio::{OutputStream, Sink};
-
-use raylib::{color::Color, prelude::*};
 
 enum GameState { IDLE, PLAY, SERVE, DONE }
 
@@ -34,8 +33,9 @@ fn main() {
     let (_stream, stream_handle) = OutputStream::try_default().unwrap();
     let sink = Sink::try_new(&stream_handle).unwrap();
     fn play_sound(sink: &Sink, filename: &str) {
-        let sound = BufReader::new(File::open(format!("src/assets/{}.wav", filename)).unwrap());
-        sink.append(rodio::Decoder::new(BufReader::new(sound)).unwrap());
+        let file = format!("src/assets/{}.wav", filename);
+        let sound = BufReader::new(File::open(file).unwrap());
+        sink.append(Decoder::new(BufReader::new(sound)).unwrap());
     }
 
     while !rayl.window_should_close() {
@@ -180,7 +180,6 @@ fn main() {
         p2  .render(&mut rl);
     }
 }
-
 
 fn draw_scores(rl: &mut RaylibDrawHandle<'_>, score1: &i32, score2: &i32) {
     rl.draw_text(
