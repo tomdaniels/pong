@@ -46,8 +46,8 @@ fn main() {
 
         match game_state {
             GameState::IDLE => {
-                let main_title = Title::new("Press [Enter] or [Space] to serve", FONT_SIZE);
-                rl.draw_text(&main_title.content, main_title.x, main_title.y, FONT_SIZE, Color::WHITE);
+                Title::new("Press [Enter] or [Space] to serve", FONT_SIZE)
+                    .draw(&mut rl, Color::WHITE, None);
 
                 if rl.is_key_down(KeyboardKey::KEY_ENTER) || rl.is_key_down(KeyboardKey::KEY_SPACE) {
                     play_sound(&audio, "serve");
@@ -114,10 +114,11 @@ fn main() {
             GameState::SERVE => {
                 draw_scores(&mut rl, &p1.score, &p2.score);
 
-                let mut serve_title = Title::new("Player 1 scored", FONT_SIZE * 2);
+                let mut serve_title = Title::new("Player 1 Scored!", FONT_SIZE_LARGE);
                 let mut serve_subtitle = Title::new("Player 2: Press [Enter] to serve", FONT_SIZE);
+
                 if p1.serves {
-                    serve_title.set_content("player 2 scored");
+                    serve_title.set_content("Player 2 Scored!");
                     serve_subtitle.set_content("player 1: press [Space] to serve");
 
                     if rl.is_key_down(KeyboardKey::KEY_SPACE) {
@@ -126,9 +127,6 @@ fn main() {
                         game_state = GameState::PLAY; 
                     }
                 } else if p2.serves {
-                    serve_title.set_content("player 1 scored");
-                    serve_subtitle.set_content("player 2: press [Enter] to serve");
-
                     if rl.is_key_down(KeyboardKey::KEY_ENTER) {
                         play_sound(&audio, "serve");
                         ball.reset(Some(-ball.speed));
@@ -136,17 +134,11 @@ fn main() {
                     }
                 }
 
-                rl.draw_text(
-                    &serve_title.content, 
-                    serve_title.x, 
-                    VERTICAL_TEXT_OFFSET + serve_title.y,
-                    serve_title.font_size,
-                    Color::WHITE
-                );
-                rl.draw_text(&serve_subtitle.content,
-                    serve_subtitle.x,
-                    VERTICAL_TEXT_OFFSET + (serve_subtitle.y * 2) + serve_title.font_size,
-                    serve_subtitle.font_size, Color::WHITE
+                serve_title.draw(&mut rl, Color::WHITE, Some(VERTICAL_TEXT_OFFSET + serve_title.y));
+                serve_subtitle.draw(
+                    &mut rl,
+                    Color::WHITE,
+                    Some(VERTICAL_TEXT_OFFSET + (serve_subtitle.y * 2) + serve_title.font_size)
                 );
             }
 
@@ -154,20 +146,15 @@ fn main() {
                 draw_scores(&mut rl, &p1.score, &p2.score);
                 ball.reset(None);
 
-                let mut winner_title = Title::new("Player 1 wins", FONT_SIZE * 2);
-                if p2.score == SCORE_TARGET {
-                    winner_title.set_content("Player 2 wins");
+                if p1.score == SCORE_TARGET {
+                    Title::new("Player 1 won!", FONT_SIZE_LARGE).draw(&mut rl, Color::GREEN, None);
                 }
-                rl.draw_text(&winner_title.content, winner_title.x, winner_title.y, winner_title.font_size, Color::GREEN);
+                if p2.score == SCORE_TARGET {
+                    Title::new("Player 2 won!", FONT_SIZE_LARGE).draw(&mut rl, Color::GREEN, None);
+                }
 
-                let restart_title  = Title::new("Press [Enter] or [Space] to start again", FONT_SIZE);
-                rl.draw_text(
-                    &restart_title.content,
-                    restart_title.x,
-                    restart_title.y + winner_title.font_size + 5,
-                    restart_title.font_size,
-                    Color::WHITE
-                );
+                Title::new("Press [Enter] or [Space] to start again", FONT_SIZE)
+                    .draw(&mut rl, Color::WHITE, Some(75));
 
                 if rl.is_key_down(KeyboardKey::KEY_ENTER) || rl.is_key_down(KeyboardKey::KEY_SPACE) {
                     p1.score = 0;
