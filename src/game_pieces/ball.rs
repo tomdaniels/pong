@@ -49,7 +49,6 @@ impl Ball {
     pub fn tick(&mut self, dt: f32) {
         self.x += self.dx * dt;
         self.y += self.dy * dt;
-
     }
 
     pub fn wall_hit(&mut self) -> bool {
@@ -107,5 +106,6 @@ impl Ball {
         self.x = WINDOW_WIDTH_HALF;
         self.y = WINDOW_HEIGHT_HALF;
         self.dx = dx.unwrap_or(self.speed);
+        self.random_dy_trajectory();
     }
 }
