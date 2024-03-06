@@ -29,13 +29,9 @@ impl<'a> StateMachine<'a> {
 
             Phase::SERVE => {
                 if self.p1.serves && (rl.is_key_down(KeyboardKey::KEY_SPACE)) {
-                    self.play_sound(&self.audio, "serve");
-                    self.ball.reset(None);
-                    self.phase = Phase::PLAY;
+                    serve_ball(self, None);
                 } else if self.p2.serves && (rl.is_key_down(KeyboardKey::KEY_ENTER)) {
-                    self.play_sound(&self.audio, "serve");
-                    self.ball.reset(Some(-self.ball.speed));
-                    self.phase = Phase::PLAY;
+                    serve_ball(self, Some(-self.ball.speed));
                 }
             }
 
@@ -48,4 +44,10 @@ impl<'a> StateMachine<'a> {
             }
         }
     }
+}
+
+fn serve_ball(machine: &mut StateMachine, dx_offset: Option<f32>) {
+    machine.play_sound(&machine.audio, "serve");
+    machine.ball.reset(dx_offset);
+    machine.phase = Phase::PLAY;
 }
