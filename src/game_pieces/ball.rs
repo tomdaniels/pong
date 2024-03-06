@@ -102,10 +102,10 @@ impl Ball {
         }
     }
 
-    pub fn reset(&mut self, dx: Option<f32>) {
+    pub fn reset(&mut self, dx_offset: Option<f32>) {
         self.x = WINDOW_WIDTH_HALF;
         self.y = WINDOW_HEIGHT_HALF;
-        self.dx = dx.unwrap_or(self.speed);
+        self.dx = dx_offset.unwrap_or(self.speed);
         self.random_dy_trajectory();
     }
 }

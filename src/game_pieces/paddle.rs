@@ -41,7 +41,7 @@ impl Paddle {
     pub fn move_paddle(&mut self, dir: Direction) {
         match dir {
             Direction::DOWN => {
-                if self.y < WINDOW_HEIGHT - 80.0 {
+                if self.y < WINDOW_HEIGHT - self.height {
                     self.y += self.speed; 
                 } 
             },

@@ -23,11 +23,6 @@ impl Title {
         }
     }
 
-    pub fn set_content(&mut self, title: &str) {
-        self.content = String::from(title);
-        self.x = centered_offset(&self.content, self.font_size);
-    }
-
     pub fn draw(&self, rl: &mut RaylibDrawHandle<'_>, color: Color, vertical_placement: Option<i32>) {
         rl.draw_text(&self.content, self.x, vertical_placement.unwrap_or(self.y), self.font_size, color);
     }
