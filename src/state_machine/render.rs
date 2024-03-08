@@ -29,7 +29,7 @@ mod render {
                     draw_scores(rl, self.p1.score, self.p2.score);
                     let winner = if self.p1.score == SCORE_TARGET { "Player 1 won!" } else { "Player 2 won!" };
                     Title::new(winner, FONT_SIZE_LARGE).draw(rl, Color::GREEN, Some(VERTICAL_TEXT_OFFSET));
-                    Title::new("Press [Enter] or [Space] to start again", FONT_SIZE).draw(rl, Color::WHITE, Some(VERTICAL_TEXT_OFFSET + FONT_SIZE_LARGE));
+                    Title::new("Press [Enter] or [Space] start again", FONT_SIZE).draw(rl, Color::WHITE, Some(VERTICAL_TEXT_OFFSET + FONT_SIZE_LARGE));
                 }
             }
 
